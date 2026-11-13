@@ -22,5 +22,15 @@ services:
       timeout: 3s
       retries: 10
 
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env.producao
+    environment:
+      NODE_ENV: production
+    depends_on:
+      banco:
+        condition: service_healthy
+
 volumes:
   reservas_dados:
