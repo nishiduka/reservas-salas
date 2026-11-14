@@ -8,16 +8,14 @@ services:
     container_name: reservas-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: reservas
-      POSTGRES_PASSWORD: reservas_local
-      POSTGRES_DB: reservas
-    ports:
-      - "127.0.0.1:5433:5432" # só acessível neste computador
+      POSTGRES_USER: ${POSTGRES_USER:?Defina POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:?Defina POSTGRES_DB}
     volumes:
       - reservas_dados:/var/lib/postgresql
       - ./docker/criar-banco-teste.sql:/docker-entrypoint-initdb.d/criar-banco-teste.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U reservas -d reservas"]
+      test: ['CMD-SHELL', 'pg_isready -U reservas -d reservas']
       interval: 5s
       timeout: 3s
       retries: 10
@@ -27,6 +25,15 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@banco:5432/${POSTGRES_DB}?schema=public
+      APP_URL: ${APP_URL:?Defina APP_URL}
+      AUTH_SECRET: ${AUTH_SECRET:?Defina AUTH_SECRET}
+      SESSION_HOURS: ${SESSION_HOURS:-12}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
     depends_on:
       banco:
         condition: service_healthy
